@@ -8,25 +8,70 @@ class DropBoxController {
 		this.namefileEl = this.snackModalEl.querySelector('.filename');
 		this.timeleftEl = this.snackModalEl.querySelector('.timeleft');
 
+		this.connectFirebase();
 		this.initEvents();
+	}
+
+	connectFirebase() {
+		var config = {
+			apiKey: "AIzaSyBPB5AbtpHyOvP8cm1bc15v4Rx6l1bpMM8",
+			authDomain: "dropbox-clone-e5485.firebaseapp.com",
+			databaseURL: "https://dropbox-clone-e5485.firebaseio.com",
+			projectId: "dropbox-clone-e5485",
+			storageBucket: "dropbox-clone-e5485.appspot.com",
+			messagingSenderId: "708796556682"
+		};
+		firebase.initializeApp(config);
 	}
 
 	initEvents() {
 
 		this.btnSendFileEl.addEventListener('click', event => {
+
 			this.inputFilesEl.click();
+
 		});
 
 		this.inputFilesEl.addEventListener('change', event => {
 
-			this.uploadTask(event.target.files);
+			this.btnSendFileEl.disabled = true;
+
+			this.uploadTask(event.target.files).then(responses => {
+
+				responses.forEach(resp => {
+
+					this.getFirebaseRef().push().set(resp.files['input-file']);
+
+				});
+
+				this.uploadComplete();
+
+			}).catch(err => {
+
+				this.uploadComplete();
+
+				console.log(err);
+
+			});
 
 			this.modalShow();
 
-			this.inputFilesEl.value = '';
-
 		});
 
+	}
+
+	uploadComplete() {
+
+		this.modalShow(false);
+
+		this.inputFilesEl.value = '';
+
+		this.btnSendFileEl.disabled = false;
+
+	}
+
+	getFirebaseRef() {
+		return firebase.database().ref('files');
 	}
 
 	modalShow(show = true) {
@@ -49,8 +94,6 @@ class DropBoxController {
 
 				ajax.onload = event => {
 
-					this.modalShow(false);
-
 					try {
 
 						resolve(JSON.parse(ajax.responseText));
@@ -65,7 +108,6 @@ class DropBoxController {
 
 				ajax.onerror = event => {
 
-					this.modalShow(false);
 					reject(event);
 
 				};
