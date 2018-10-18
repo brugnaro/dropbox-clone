@@ -39,7 +39,43 @@ class DropBoxController {
 
 	}
 
+	removeTask() {
+
+		let promises = [];
+
+		this.getSelection().forEach(li => {
+
+			let file = JSON.parse(li.dataset.file);
+
+			let formData = new FormData();
+
+			formData.append('path', file.path);
+
+			formData.append('key', file.key);
+
+			promises.push(this.ajax('/file', 'DELETE', formData));
+
+			return Promise.all(promises);
+
+		});
+
+	};
+
 	initEvents() {
+
+		this.btnDelete.addEventListener('click', e => {
+
+			this.removeTask().then(responses => {
+
+				console.log('responses');
+
+			}).catch(err => {
+
+				console.error(err);
+
+			});
+
+		});
 
 		this.btnRename.addEventListener('click', e => {
 
@@ -136,51 +172,61 @@ class DropBoxController {
 
 	}
 
+	ajax(url, method = 'GET', formData = new FormData(), onprogress = function () { }, onloadstart = function () { }) {
+
+		return new Promise((resolve, reject) => {
+
+			let ajax = new XMLHttpRequest();
+
+			ajax.open(method, url);
+
+			ajax.onload = event => {
+
+				try {
+
+					resolve(JSON.parse(ajax.responseText));
+
+				} catch (e) {
+
+					reject(e);
+
+				}
+
+			};
+
+			ajax.onerror = event => {
+
+				reject(event);
+
+			};
+
+			ajax.upload.onprogress = onprogress;
+
+			onloadstart();
+
+			ajax.send(formData);
+
+		});
+
+	}
+
 	uploadTask(files) {
 
 		let promises = [];
 
 		[...files].forEach(file => {
 
-			promises.push(new Promise((resolve, reject) => {
+			let formData = new FormData();
 
-				let ajax = new XMLHttpRequest();
+			formData.append('input-file', file);
 
-				ajax.open('POST', '/upload');
+			promises.push(this.ajax('/upload', 'POST', formData, () => {
 
-				ajax.onload = event => {
+				this.uploadProgress(event, file);
 
-					try {
-
-						resolve(JSON.parse(ajax.responseText));
-
-					} catch (e) {
-
-						reject(e);
-
-					}
-
-				};
-
-				ajax.onerror = event => {
-
-					reject(event);
-
-				};
-
-				ajax.upload.onprogress = event => {
-
-					this.uploadProgress(event, file);
-
-				}
-
-				let formData = new FormData();
-
-				formData.append('input-file', file);
+			}, () => {
 
 				this.startUploadTime = Date.now();
-
-				ajax.send(formData);
 
 			}));
 
