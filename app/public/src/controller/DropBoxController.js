@@ -19,6 +19,7 @@ class DropBoxController {
 		this.connectFirebase();
 		this.initEvents();
 		this.readFiles();
+
 	}
 
 	connectFirebase() {
@@ -46,18 +47,18 @@ class DropBoxController {
 		this.getSelection().forEach(li => {
 
 			let file = JSON.parse(li.dataset.file);
+			let key = li.dataset.key;
 
 			let formData = new FormData();
 
 			formData.append('path', file.path);
-
-			formData.append('key', file.key);
+			formData.append('key', key);
 
 			promises.push(this.ajax('/file', 'DELETE', formData));
 
-			return Promise.all(promises);
-
 		});
+
+		return Promise.all(promises);
 
 	};
 
@@ -67,7 +68,15 @@ class DropBoxController {
 
 			this.removeTask().then(responses => {
 
-				console.log('responses');
+				responses.forEach(response => {
+
+					if (response.fields.key) {
+
+						this.getFirebaseRef().child(response.fields.key).remove();
+
+					}
+
+				});
 
 			}).catch(err => {
 
@@ -442,7 +451,10 @@ class DropBoxController {
 
 		let li = document.createElement('li');
 
+		file.key = key;
+
 		li.dataset.key = key;
+
 		li.dataset.file = JSON.stringify(file);
 
 		li.innerHTML = `
@@ -468,7 +480,7 @@ class DropBoxController {
 
 				let data = snapshotItem.val();
 
-				this.listFilesEl.appendChild(this.getFileView(data));
+				this.listFilesEl.appendChild(this.getFileView(data, key));
 
 			});
 
