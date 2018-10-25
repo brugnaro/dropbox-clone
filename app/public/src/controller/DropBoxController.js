@@ -2,6 +2,8 @@ class DropBoxController {
 
 	constructor() {
 
+		this.currentFolder = ['hcode'];
+
 		this.onselectionchange = new Event('selectionchange');
 
 		this.btnSendFileEl = document.querySelector('#btn-send-file');
@@ -18,7 +20,7 @@ class DropBoxController {
 
 		this.connectFirebase();
 		this.initEvents();
-		this.readFiles();
+		this.openFolder();
 
 	}
 
@@ -63,6 +65,24 @@ class DropBoxController {
 	};
 
 	initEvents() {
+
+		this.btnNewFolder.addEventListener('click', e => {
+
+			let name = prompt('Nome da nova pasta: ');
+
+			if (name) {
+
+				this.getFirebaseRef().push().set({
+
+					name,
+					type: 'folder',
+					path: this.currentFolder.join('/')
+
+				});
+
+			};
+
+		});
 
 		this.btnDelete.addEventListener('click', e => {
 
@@ -171,8 +191,12 @@ class DropBoxController {
 
 	}
 
-	getFirebaseRef() {
-		return firebase.database().ref('files');
+	getFirebaseRef(path) {
+
+		if (!path) path = this.currentFolder.join('/');
+
+		return firebase.database().ref(path);
+
 	}
 
 	modalShow(show = true) {
@@ -470,6 +494,8 @@ class DropBoxController {
 
 	readFiles() {
 
+		this.lastFolder = this.currentFolder.join('/');
+
 		this.getFirebaseRef().on('value', snapshot => {
 
 			this.listFilesEl.innerHTML = '';
@@ -488,11 +514,38 @@ class DropBoxController {
 
 	}
 
+	openFolder() {
+
+		if (this.lastFolder) this.getFirebaseRef(this.lastFolder)
+			.off('value');
+
+		this.readFiles();
+
+	}
+
 	initEventsLi(li) {
 
+		li.addEventListener('dblclick', e => {
+
+			let file = JSON.parse(li.dataset.file);
+
+			switch (file.type) {
+
+				case 'folder':
+					this.currentFolder.push(file.name);
+					this.openFolder();
+					break;
+
+				default:
+					window.open('/file?path=' + file.path);
+
+
+			}
+
+		});
+
+
 		li.addEventListener('click', e => {
-
-
 
 			if (e.shiftKey) {
 
@@ -550,3 +603,5 @@ class DropBoxController {
 	}
 
 }
+
+//D18 - 12:05
