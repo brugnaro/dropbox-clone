@@ -263,14 +263,14 @@ class DropBoxController {
 			this.uploadTask(event.target.files).then(responses => {
 
 				responses.forEach(resp => {
-					console.log(resp)
-					this.getFirebaseRef().push().set({
 
-						name: resp.name,
-						type: resp.contentType,
-						path: resp.fullPath,
-						size: resp.size
-
+					resp.ref.getDownloadURL().then(data => {
+						this.getFirebaseRef().push().set({
+							name: resp.name,
+							type: resp.contentType,
+							path: data,
+							size: resp.size
+						});
 					});
 
 				});
