@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>
+    <%= title %>
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="assets/css/login.css" rel="stylesheet">
+</head>
+
+<body>
+  <div>Login</div>
+  <form id="signup-form">
+    <input type="text" placeholder="Email" name="email" />
+    <input type="text" placeholder="Password" name="password" />
+    <button type='submit'>Login</button>
+  </form>
+
+
+  <script src="https://www.gstatic.com/firebasejs/5.5.3/firebase.js"></script>
+  <script src='src/controller/LoginController.js'></script>
+  <script src='src/login.js'></script>
+</body>
+
+</html>

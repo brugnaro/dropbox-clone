@@ -1,0 +1,1 @@
+window.login = new LoginController();
