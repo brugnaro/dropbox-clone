@@ -1,0 +1,1 @@
+window.signup = new SignUpController();
