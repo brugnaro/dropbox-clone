@@ -2,7 +2,7 @@ class DropBoxController {
 
 	constructor() {
 
-		this.currentFolder = ['hcode'];
+		this.currentFolder = ['musics'];
 
 		this.onselectionchange = new Event('selectionchange');
 
